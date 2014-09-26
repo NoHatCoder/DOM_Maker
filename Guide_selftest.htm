@@ -1,0 +1,348 @@
+<!doctype html>
+
+<!--
+Copyright (c) 2014, Specialisterne.
+http://specialisterne.com/dk/
+All rights reserved.
+Authors:
+Jacob Christian Munch-Andersen
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met: 
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer. 
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution. 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<!--For information and latest version see: https://github.com/Jacob-Christian-Munch-Andersen/DOM_Maker-->
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Test dom.js</title>
+	<script src="dom.js"></script>
+	<style>
+		ol,pre{
+			margin:0;
+		}
+		code{
+			background-color:#e4e4e4;
+			padding:0px 4px;
+		}
+		pre code{
+			padding:0;
+		}
+		pre{
+			padding:4px 8px;
+			background-color:#e4e4e4;
+		}
+		body{
+			font-family:arial,helvetica,sans-serif;
+		}
+	</style>
+</head>
+<body>
+
+<script>
+	var clickMe
+	var mousediv
+	dom.globalScope()
+	
+	document.body.appendChild(FRAGMENT(
+		H2("DOM Maker")
+		,H3("Purpose")
+		,"Provide a library that lets programmers build DOM dynamically in the browser using a syntax that is at least as short and readable as HTML, while providing all the benefits of using the JavaScript DOM construction methods, including inherent protection against HTML injection through text strings, and using functions with scope as event handlers.\n\nThe library should itself be short and easily readable. Rather than the library providing functionality for all eventualities, it should be easy to use the library with custom code for dealing with such eventualities, or to change the library to suit individual needs."
+		,H3("Scope")
+		,"The following is within the scope of the project:"
+		,UL(
+			LI("To deal with the most prevalent browser quirks, that arises when constructing DOM.")
+			,LI("To do so for every modern and widespread browser, including phone browsers and Internet Explorer 8 and later.")
+			,LI("To create native DOM elements with no modifications beyond those explicitly stated by the user programmer.")
+			,LI("To work in mixed environments with other libraries.")
+			,LI("To work as a stand-alone library.")
+		)
+		,"The following is ",STRONG("not")," within the scope of the project:"
+		,UL(
+			LI("To deal with the DOM creation quirks of Internet Explorer 7 and earlier.")
+			,LI("To provide a method for modifying existing DOM elements.")
+			,LI("To provide a fallback in case JavaScript is turned off in the browser.")
+			,LI("To provide a method for server-side DOM construction.")
+			,LI("To actively hinder any method of use.")
+			,LI("To rely on any other external library.")
+			,LI("To imitate the style of or integrate seamlessly with specific other libraries.")
+		)
+		,H3("Features")
+		,UL(
+			LI("Create any HTML structure.")
+			,LI("Use a short and easily readable syntax.")
+			,LI("Integrate event handlers seamlessly.")
+			,LI("Very small download, less than 8 kB uncompressed.")
+		)
+		,H3("Usage")
+		,"Download the ",CODE("dom.js")," file and include it in your project. The code will create one global variable named ",CODE("dom"),". Use ",CODE("dom")," as a function to create a new DOM element with the following syntax:\n\n"
+		,PRE(CODE("dom(tagName [, properties] [, childElements ...])")),"\n"
+		,"Where ",CODE("tagName")," is a string containing the name of the element, ",CODE("properties")," is an optional object specifying the properties to be set on the element after creation, and ",CODE("childElements")," is any number of arguments, each representing one or multiple elements to be added as child elements of the created DOM element. Most properties can simply be set by adding the property name as a key, with the desired value as value to the ",CODE("properties")," object. The most notable exception is inline styles where the value must itself be an object with keys for style attributes and values for style values. Valid child element arguments are DOM elements, strings and arrays containing any mix of these 3 types of arguments. DOM elements will simply be appended in raw form. Strings will be converted to text nodes, and the line breaks in those strings will be converted to ",CODE("<br>")," elements. Arrays will have their contained elements treated as individual arguments, arrays may themselves contain arrays. A simple example:\n\n"
+		,PRE(CODE('document.body.appendChild(dom("div", {id:"yellow_div", className:"color", style:{backgroundColor:"yellow"}}, "This div is yellow."))')),"\n"
+		,dom("div",{id:"yellow_div",className:"color",style:{backgroundColor:"yellow"}},"This div is yellow."),"\n"
+		,"The ",CODE("dom")," object also has an attached shortcut function for each valid HTML tag. The key to each of these functions is the tag name in upper case. These functions work exactly like the ",CODE("dom")," function, except that they don't take a ",CODE("tagName")," argument. Example:\n\n"
+		,PRE(CODE(
+			'document.body.appendChild(\n'
+			,'    dom.DIV({style:{backgroundColor:"#66ff66"}}\n'
+			,'        ,dom.OL(\n'
+			,'            dom.LI("Make free JavaScript library.")\n'
+			,'            ,dom.LI()\n'
+			,'            ,dom.LI("Profit!")\n'
+			,'        )\n'
+			,'    )\n'
+			,')'
+		)),"\n"
+		,dom.DIV({style:{backgroundColor:"#66ff66"}}
+			,dom.OL(
+				dom.LI("Make free JavaScript library.")
+				,dom.LI()
+				,dom.LI("Profit!")
+			)
+		),"\n"
+		,"Notice how multiple calls are chained in order to build a more complex DOM structure, and notice how the code is structured to resemble the structure of HTML.\n\n"
+		,"The ",CODE("dom")," object has 4 more attached functions. The ",CODE("FRAGMENT")," function works just like the other DOM construction functions, but creates a ",A({href:"https://developer.mozilla.org/en-US/docs/Web/API/document.createDocumentFragment",target:"_blank"},"document fragment"),". The ",CODE("globalScope")," function copies all of the DOM construction functions to the global scope, thus making it possible to construct even shorter code. Example:\n\n"
+		,PRE(CODE(
+			'dom.globalScope()\n'
+			,'document.body.appendChild(\n'
+			,'    FRAGMENT(\n'
+			,'        DIV({style:{backgroundColor:"red"}}\n'
+			,'            ,H4("William Shakespeare quotes")\n'
+			,'            ,BLOCKQUOTE("We know what we are, but know not what we may be.")\n'
+			,'            ,BLOCKQUOTE("A fool thinks himself to be wise, but a wise man knows himself to be a fool.")\n'
+			,'            ,BLOCKQUOTE("It is not in the stars to hold our destiny but in ourselves.")\n'
+			,'        )\n'
+			,'        ,DIV({style:{backgroundColor:"green"}}\n'
+			,'            ,H4("Douglas Adams quotes")\n'
+			,'            ,BLOCKQUOTE("A common mistake that people make when trying to design something completely foolproof is to underestimate\\\n                    the ingenuity of complete fools.")\n'
+			,'            ,BLOCKQUOTE("Human beings, who are almost unique in having the ability to learn from the experience of others, are also\\\n                    remarkable for their apparent disinclination to do so.")\n'
+			,'            ,BLOCKQUOTE("I love deadlines. I like the whooshing sound they make as they fly by.")\n'
+			,'        )\n'
+			,'    )\n'
+			,')'
+		))
+		,FRAGMENT(
+			DIV({style:{backgroundColor:"red"}}
+				,H4("William Shakespeare quotes")
+				,BLOCKQUOTE("We know what we are, but know not what we may be.")
+				,BLOCKQUOTE("A fool thinks himself to be wise, but a wise man knows himself to be a fool.")
+				,BLOCKQUOTE("It is not in the stars to hold our destiny but in ourselves.")
+			)
+			,DIV({style:{backgroundColor:"green"}}
+				,H4("Douglas Adams quotes")
+				,BLOCKQUOTE("A common mistake that people make when trying to design something completely foolproof is to underestimate\
+						the ingenuity of complete fools.")
+				,BLOCKQUOTE("Human beings, who are almost unique in having the ability to learn from the experience of others, are also\
+						remarkable for their apparent disinclination to do so.")
+				,BLOCKQUOTE("I love deadlines. I like the whooshing sound they make as they fly by.")
+			)
+		)
+		,"The ",CODE("curry")," function can be used to apply a partial set of arguments to a function; this may be useful when constructing event handlers. Call the ",CODE("curry")," function with a function as first argument, followed by any number of arguments to pass on to that function. The curry function will return a wrapper function which when called will call the given function with the arguments given to curry. The arguments received by the wrapper function will in order replace any ",CODE("undefined")," arguments given to the curry function; any remaining arguments will follow the arguments given to the curry function. A simple example:\n\n"
+		,PRE(CODE(
+			'function alertAll(){\n'
+			,'    var i\n'
+			,'    var output="The following "+arguments.length+" values were given:"\n'
+			,'    for(i=0;i<arguments.length;i++){\n'
+			,'        output+="\\n"+arguments[i]\n'
+			,'    }\n'
+			,'    alert(output)\n'
+			,'}\n'
+			,'document.body.appendChild(\n'
+			,'    dom.BUTTON({onclick:dom.curry(alertAll,1,undefined,3)},"Test curry")\n'
+			,')'
+		)),"\n"
+		,dom.BUTTON({onclick:dom.curry(alertAll,1,undefined,3)},"Test curry"),"\n\n"
+		,"Notice when the button is clicked that the event object generated by the click is passed to ",CODE("alertAll")," as the second argument, since that was the first argument to be undefined when ",CODE("alertAll")," was curried.\n\n"
+		,"Finally the ",CODE("wrapHandler")," function can be used to wrap an event handler so that it will receive the event object when called in Internet Explorer 8 and earlier. In browsers that don't need this wrap the given event handler is returned without modification. Note that the library will use this wrap automatically; it should be used manually only when setting an event handler on an existing DOM object. Example:\n\n"
+		,PRE(CODE(
+			'document.body.appendChild(\n'
+			,'    mousediv=DIV({style:{height:"120px",backgroundColor:"pink",position:"relative"}})\n'
+			,')\n'
+			,'function displayCoordinates(event){\n'
+			,'    this.innerHTML=""\n'
+			,'    var x=isNaN(+event.offsetX)?event.layerX:event.offsetX\n'
+			,'    var y=isNaN(+event.offsetY)?event.layerY:event.offsetY\n'
+			,'    this.appendChild(FRAGMENT("Mouse position: "+x+", "+y))\n'
+			,'}\n'
+			,'mousediv.onmousemove=dom.wrapHandler(displayCoordinates)'
+		)),"\n"
+		,mousediv=DIV({style:{height:"120px",backgroundColor:"pink",position:"relative"}})
+		,H3("Quirks fixed")
+		,UL(
+			LI("Properties that are not named after their attribute counterpart in lower case has been given such an alias. The library will automatically convert to the correct word and casing.")
+			,LI("The properties ",CODE("encoding")," and ",CODE("enctype")," which are different keys to the attribute ",CODE("enctype")," are both set when one of them is set, in order to work with all browsers.")
+			,LI("Internet Explorer 8 and earlier does not pass an event object to event handlers, event handlers set with this library will be wrapped to correct that.")
+		)
+		,H3("Typical problems")
+		,"While this library is designed to make use as intuitive and easy as possible, there are a few mistakes that are easy to make. Know them, and know how to deal with them."
+		,UL(
+			LI("Missing braces, parentheses, colons and commas. The syntax for making a complicated DOM structure generally requires a lot of these, it is easy to miss a few and thus cause a parser error. Fortunately the JavaScript console in most modern browsers will generally have good information about where the error is, though the error message doesn't necessarily describe the exact mistake.")
+			,LI(
+				"Trying to use native DOM method like ",CODE("appendChild")," with multiple DOM element arguments. Only the library functions can do this, the native DOM methods will silently ignore additional arguments. The desired functionality can be achieved by utilizing a document fragment, like so:\n\n"
+				,PRE(CODE(
+					'document.body.appendChild(dom.FRAGMENT(\n'
+					,'    dom.DIV()\n'
+					,'    dom.SPAN()\n'
+					,'))'
+				))
+				,"\n"
+			)
+			,LI(
+				"Referencing variables that haven't been set yet when currying event handlers. An example of the problem:\n\n"
+				,PRE(CODE(
+					'function makeRed(obj){obj.style.backgroundColor="red"}\n'
+					,'var clickMe=dom.BUTTON({onclick:dom.curry(makeRed,clickMe)},"Click here!")\n'
+					,'document.body.appendChild(clickMe)'
+				))
+				,"\n"
+				,clickMe=dom.BUTTON({onclick:dom.curry(makeRed,clickMe)},"Click here!")
+				,"\n\n"
+				,CODE("clickMe")," will only have a value after it was used in the curry function, so clicking the button won't work as expected. This problem can easily be fixed by creating and appending the handler after the DOM has been constructed. In some cases a more elegant solution is to design the handler to work with its own ",CODE("this")," value instead. A working example:\n\n"
+				,PRE(CODE(
+					'function makeRed(){this.style.backgroundColor="red"}\n'
+					,'var clickMe=dom.BUTTON({onclick:makeRed},"Click here!")\n'
+					,'document.body.appendChild(clickMe)'
+				))
+				,"\n"
+				,dom.BUTTON({onclick:makeRed2},"Click here!")
+			)
+		)
+	))
+	function alertAll(){
+		var i
+		var output="The following "+arguments.length+" values were given:"
+		for(i=0;i<arguments.length;i++){
+			output+="\n"+arguments[i]
+		}
+		alert(output)
+	}
+	
+	function displayCoordinates(event){
+		this.innerHTML=""
+		var x=isNaN(+event.offsetX)?event.layerX:event.offsetX
+		var y=isNaN(+event.offsetY)?event.layerY:event.offsetY
+		this.appendChild(FRAGMENT("Mouse position: "+x+", "+y))
+	}
+	mousediv.onmousemove=dom.wrapHandler(displayCoordinates)
+	
+	function makeRed(obj){obj.style.backgroundColor="red"}
+	function makeRed2(){this.style.backgroundColor="red"}
+
+	document.body.appendChild(FRAGMENT(
+		H3("A colourful table")
+		,"A demonstration of how a repetitive DOM structure can be generated. See the code in the source.\n\n"
+	))
+	var row,cell
+	var rows,cells
+	rows=[]
+	for(row=0;row<52;row++){
+		cells=[]
+		for(cell=0;cell<52;cell++){
+			cells.push(TD({
+				style:{backgroundColor:"rgb("+(5*row)+",0,"+(5*cell)+")",width:"8px",height:"8px"}
+				,onmouseover:dom.curry(over,row,cell)
+				,onmouseout:dom.curry(out,row,cell)
+			}))
+		}
+		rows.push(TR(cells))
+	}
+	function over(row,cell){
+		this.style.backgroundColor="rgb("+(5*row)+",255,"+(5*cell)+")"
+	}
+	function out(row,cell){
+		this.style.backgroundColor="rgb("+(5*row)+",0,"+(5*cell)+")"
+	}
+	document.body.appendChild(FRAGMENT(TABLE({cellspacing:0,cellpadding:0},TBODY(rows)),"\n"))
+
+	document.body.appendChild(FRAGMENT(
+		H3("Infinite tree")
+		,"Click the right or left part of a node in order to create a branch. See the code in the source.\n\n"
+	))
+	var tree={} //A map of occupied positions.
+	var rightextension=0,leftextension=0,bottomextension=0
+	var container=DIV({style:{position:"relative",height:"52px",width:"110px"}})
+	var treediv=DIV({style:{display:"inline-block"}},container)
+	document.body.appendChild(treediv)
+	makeHorizontalNode(container,0,0,[128,128,128],"left") //Create the first node.
+	function makeHorizontalNode(parent,x,y,color,offset){
+		var i
+		//Morph the colour of the parent node to a new colour.
+		var newColor=[]
+		for(i=0;i<3;i++){
+			newColor[i]=Math.round(Math.min(255,Math.max(0,color[i]-50+100*Math.random())))
+		}
+		var main=DIV({style:{position:"absolute",bottom:"0px"}}
+			,DIV({style:{
+					width:"108px"
+					,height:"50px"
+					,border:"1px solid black"
+					,position:"relative"
+					//Make a gradient in old Internet Explorers.
+					,filter:'progid:DXImageTransform.Microsoft.Gradient(startColorStr="'+colorStr(color)+'", endColorStr="'+colorStr(newColor)+'")'
+					//Make the same gradient in all other browsers.
+					,background:"linear-gradient(rgb("+color.join()+"),rgb("+newColor.join()+"))"
+				}}
+				//Two divs for click handling.
+				,DIV({
+					style:{width:"50px",height:"50px",position:"absolute",top:"0",left:"0",cursor:"pointer"}
+					,onclick:dom.curry(makeVerticalNode,x,y+1,newColor,"left")
+				})
+				,DIV({
+					style:{width:"50px",height:"50px",position:"absolute",top:"0",right:"0",cursor:"pointer"}
+					,onclick:dom.curry(makeVerticalNode,x+1,y+1,newColor,"right")
+				})
+			)
+		)
+		//Align with either the left or the right edge of the parent verticalNode.
+		main.style[offset]="0px"
+		//Insert the created DOM structure in the designated parent.
+		parent.appendChild(main)
+		function colorStr(color){
+			return "#"+("00000"+((color[0]*256+color[1])*256+color[2]).toString(16)).slice(-6)
+		}
+	}
+	function makeVerticalNode(x,y,color,offset){
+		//Check if the spot to be used is occupied, if not, continue and mark it occupied.
+		if(tree[x+"-"+y]){
+			return
+		}
+		tree[x+"-"+y]=true
+		var main=DIV({style:{position:"absolute",top:"0px"}}
+			,DIV({style:{width:"50px",height:"108px",border:"1px solid black",position:"relative"}}
+				//Make a bridge element that cover the borders of the two nodes.
+				,DIV({style:{width:"100%",height:"12px",position:"absolute",top:"48px",left:"0px",zIndex:"1",backgroundColor:"rgb("+color.join()+")"}})
+			)
+		)
+		//Align with either the left or the right edge of the parent horizontalNode.
+		main.style[offset]="0px"
+		//"this" refer to a click handling div, its grandparent is the main div of a horizontalNode. Insert as first child in order to be placed under the styling div.
+		this.parentNode.parentNode.insertBefore(main,this.parentNode)
+		//Chain to a horizontalNode immediately.
+		makeHorizontalNode(main,x,y,color,{left:"right",right:"left"}[offset])
+		//All the position:"absolute" elements do nothing to expand their containers, calculating and adding a suitable amount of padding serves to reserves the needed space.
+		leftextension=Math.max(leftextension,(y-2*x)*58)
+		rightextension=Math.max(rightextension,(2*x-y)*58)
+		bottomextension=Math.max(bottomextension,y*58)
+		treediv.style.paddingLeft=leftextension+"px"
+		treediv.style.paddingRight=rightextension+"px"
+		treediv.style.paddingBottom=bottomextension+"px"
+	}
+</script>
+</body>
+</html>

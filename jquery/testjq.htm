@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Test dom.js with jQuery</title>
+	<script src="jquery-1.11.1.min.js"></script>
+	<script src="../dom.js"></script>
+	<style>
+
+	</style>
+</head>
+<body>
+	<span class="mess">Some</span>
+	<div id="messcontainer"></div>
+	<span class="mess"> spans</span>
+	<span class="mess"> left </span><br>
+	<span class="mess">in</span>
+	<span class="mess"> the</span>
+	<span class="mess"> root </span>
+	<span class="mess">of </span>
+	<div>Div with text</div>
+	<span class="mess">the </span>
+	<span class="mess">body</span>
+<script>
+	$(dom.DIV(
+		{style:{backgroundColor:"red",width:"500px",height:"300px",padding:"20px"}}
+		,dom.SPAN(
+			{style:{backgroundColor:"white",padding:"5px"}}
+			,$(".mess")
+		)
+	)).appendTo("#messcontainer")
+</script>
+</body>
+</html>
