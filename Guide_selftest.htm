@@ -1,8 +1,11 @@
 <!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
 
 <!--
-Copyright (c) 2014, Specialisterne.
-http://specialisterne.com/dk/
+Copyright (c) 2014-2020, Specialisterne, Jacob Christian Munch-Andersen.
+http://dk.specialisterne.com/
 All rights reserved.
 Authors:
 Jacob Christian Munch-Andersen
@@ -27,11 +30,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<!--For information and latest version see: https://github.com/Jacob-Christian-Munch-Andersen/DOM_Maker-->
+<!--For information and latest version see: https://github.com/NoHatCoder/DOM_Maker-->
 
-<html>
-<head>
-	<meta charset="utf-8">
 	<title>Test dom.js</title>
 	<script src="dom.js"></script>
 	<style>
@@ -52,6 +52,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		body{
 			font-family:arial,helvetica,sans-serif;
 		}
+		.pinkerror{
+			background-color:#f0f;
+		}
 	</style>
 </head>
 <body>
@@ -59,8 +62,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <script>
 	var clickMe
 	var mousediv
-	dom.globalScope()
-	
+	dom.errorClass="pinkerror"
+
 	document.body.appendChild(FRAGMENT(
 		H2("DOM Maker")
 		,H3("Purpose")
@@ -68,15 +71,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		,H3("Scope")
 		,"The following is within the scope of the project:"
 		,UL(
-			LI("To deal with the most prevalent browser quirks, that arises when constructing DOM.")
-			,LI("To do so for every modern and widespread browser, including phone browsers and Internet Explorer 8 and later.")
+			LI("To deal with the most prevalent browser quirks, that arise when constructing DOM.")
+			,LI("To do so for every modern and widespread browser, including phone browsers and Internet Explorer 9 and later.")
 			,LI("To create native DOM elements with no modifications beyond those explicitly stated by the user programmer.")
 			,LI("To work in mixed environments with other libraries.")
 			,LI("To work as a stand-alone library.")
 		)
 		,"The following is ",STRONG("not")," within the scope of the project:"
 		,UL(
-			LI("To deal with the DOM creation quirks of Internet Explorer 7 and earlier.")
+			LI("To deal with the DOM creation quirks of Internet Explorer 8 and earlier.")
 			,LI("To provide a method for modifying existing DOM elements.")
 			,LI("To provide a fallback in case JavaScript is turned off in the browser.")
 			,LI("To provide a method for server-side DOM construction.")
@@ -89,12 +92,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			LI("Create any HTML structure.")
 			,LI("Use a short and easily readable syntax.")
 			,LI("Integrate event handlers seamlessly.")
-			,LI("Very small download, less than 8 kB uncompressed.")
+			,LI("Very small download, less than 7 kB uncompressed.")
 		)
 		,H3("Usage")
-		,"Download the ",CODE("dom.js")," file and include it in your project. The code will create one global variable named ",CODE("dom"),". Use ",CODE("dom")," as a function to create a new DOM element with the following syntax:\n\n"
-		,PRE(CODE("dom(tagName [, properties] [, childElements ...])")),"\n"
-		,"Where ",CODE("tagName")," is a string containing the name of the element, ",CODE("properties")," is an optional object specifying the properties to be set on the element after creation, and ",CODE("childElements")," is any number of arguments, each representing one or multiple elements to be added as child elements of the created DOM element. Most properties can simply be set by adding the property name as a key, with the desired value as value to the ",CODE("properties")," object. The most notable exception is inline styles where the value must itself be an object with keys for style attributes and values for style values. Valid child element arguments are DOM elements, strings and arrays containing any mix of these 3 types of arguments. DOM elements will simply be appended in raw form. Strings will be converted to text nodes, and the line breaks in those strings will be converted to ",CODE("<br>")," elements. Arrays will have their contained elements treated as individual arguments, arrays may themselves contain arrays. A simple example:\n\n"
+		,"Download the ",CODE("dom.js")," file and include it in your project. The code will create the global variable ",CODE("dom"),", along with with one shortcut function for each legal HTML tag. Create DOM element with one of the following syntaxes:\n\n"
+		,PRE(CODE("dom(\"div\" [, properties] [, childElements ...])\ndom.DIV([properties] [, childElements ...])\nDIV([properties] [, childElements ...])")),"\n"
+		,"Where ",CODE("properties")," is an optional object specifying the properties to be set on the element after creation, and ",CODE("childElements")," is any number of arguments, each representing one or multiple elements to be added as child elements of the created DOM element. Most properties can simply be set by adding the property name as a key, with the desired value as value to the ",CODE("properties")," object. The most notable exception is inline styles where the value must itself be an object with keys for style attributes and values for style values. Valid child element arguments are DOM elements, strings, numbers, ",CODE("null")," and arrays containing any mix of these 5 types of arguments. DOM elements will simply be appended in raw form. Strings will be converted to text nodes, and the line breaks in those strings will be converted to ",CODE("<br>")," elements. Arrays will have their contained elements treated as individual arguments, arrays may themselves contain arrays. A simple example:\n\n"
 		,PRE(CODE('document.body.appendChild(dom("div", {id:"yellow_div", className:"color", style:{backgroundColor:"yellow"}}, "This div is yellow."))')),"\n"
 		,dom("div",{id:"yellow_div",className:"color",style:{backgroundColor:"yellow"}},"This div is yellow."),"\n"
 		,"The ",CODE("dom")," object also has an attached shortcut function for each valid HTML tag. The key to each of these functions is the tag name in upper case. These functions work exactly like the ",CODE("dom")," function, except that they don't take a ",CODE("tagName")," argument. Example:\n\n"
@@ -117,10 +120,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			)
 		),"\n"
 		,"Notice how multiple calls are chained in order to build a more complex DOM structure, and notice how the code is structured to resemble the structure of HTML.\n\n"
-		,"The ",CODE("dom")," object has 4 more attached functions. The ",CODE("FRAGMENT")," function works just like the other DOM construction functions, but creates a ",A({href:"https://developer.mozilla.org/en-US/docs/Web/API/document.createDocumentFragment",target:"_blank"},"document fragment"),". The ",CODE("globalScope")," function copies all of the DOM construction functions to the global scope, thus making it possible to construct even shorter code. Example:\n\n"
+		,"The ",CODE("dom")," object has some attached functionality. The ",CODE("FRAGMENT")," function works just like the other DOM construction functions, but creates a ",A({href:"https://developer.mozilla.org/en-US/docs/Web/API/document.createDocumentFragment",target:"_blank"},"document fragment"),". Example:\n\n"
 		,PRE(CODE(
-			'dom.globalScope()\n'
-			,'document.body.appendChild(\n'
+			'document.body.appendChild(\n'
 			,'    FRAGMENT(\n'
 			,'        DIV({style:{backgroundColor:"red"}}\n'
 			,'            ,H4("William Shakespeare quotes")\n'
@@ -169,25 +171,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		)),"\n"
 		,dom.BUTTON({onclick:dom.curry(alertAll,1,undefined,3)},"Test curry"),"\n\n"
 		,"Notice when the button is clicked that the event object generated by the click is passed to ",CODE("alertAll")," as the second argument, since that was the first argument to be undefined when ",CODE("alertAll")," was curried.\n\n"
-		,"Finally the ",CODE("wrapHandler")," function can be used to wrap an event handler so that it will receive the event object when called in Internet Explorer 8 and earlier. In browsers that don't need this wrap the given event handler is returned without modification. Note that the library will use this wrap automatically; it should be used manually only when setting an event handler on an existing DOM object. Example:\n\n"
+		,"The ",CODE("dom.errorClass")," value can be set in order to stop the library throwing when an illegal input is given, and instead insert the error message into the created DOM structure. The error message will be a span with the value set as class. Style with this class to make error messages easy to spot. Example:\n\n"
 		,PRE(CODE(
-			'document.body.appendChild(\n'
-			,'    mousediv=DIV({style:{height:"120px",backgroundColor:"pink",position:"relative"}})\n'
-			,')\n'
-			,'function displayCoordinates(event){\n'
-			,'    this.innerHTML=""\n'
-			,'    var x=isNaN(+event.offsetX)?event.layerX:event.offsetX\n'
-			,'    var y=isNaN(+event.offsetY)?event.layerY:event.offsetY\n'
-			,'    this.appendChild(FRAGMENT("Mouse position: "+x+", "+y))\n'
-			,'}\n'
-			,'mousediv.onmousemove=dom.wrapHandler(displayCoordinates)'
+			'dom.errorClass="pinkerror"'
+			,'DIV(\n'
+			,'    "Today is ", new Date(), " a great day indeed!\\n"\n'
+			,'    ,SPAN({style:"color:#f00;"}, "Tomorrow will be even greater!")\n'
+			,')'
 		)),"\n"
-		,mousediv=DIV({style:{height:"120px",backgroundColor:"pink",position:"relative"}})
-		,H3("Quirks fixed")
+		,DIV("Today is ", new Date(), " a great day indeed!\n",SPAN({style:"color:#f00;"}, "Tomorrow will be even greater!"))
+		,H3("Quirk fixed")
 		,UL(
 			LI("Properties that are not named after their attribute counterpart in lower case has been given such an alias. The library will automatically convert to the correct word and casing.")
-			,LI("The properties ",CODE("encoding")," and ",CODE("enctype")," which are different keys to the attribute ",CODE("enctype")," are both set when one of them is set, in order to work with all browsers.")
-			,LI("Internet Explorer 8 and earlier does not pass an event object to event handlers, event handlers set with this library will be wrapped to correct that.")
 		)
 		,H3("Typical problems")
 		,"While this library is designed to make use as intuitive and easy as possible, there are a few mistakes that are easy to make. Know them, and know how to deal with them."
@@ -232,15 +227,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		}
 		alert(output)
 	}
-	
-	function displayCoordinates(event){
-		this.innerHTML=""
-		var x=isNaN(+event.offsetX)?event.layerX:event.offsetX
-		var y=isNaN(+event.offsetY)?event.layerY:event.offsetY
-		this.appendChild(FRAGMENT("Mouse position: "+x+", "+y))
-	}
-	mousediv.onmousemove=dom.wrapHandler(displayCoordinates)
-	
+
 	function makeRed(obj){obj.style.backgroundColor="red"}
 	function makeRed2(){this.style.backgroundColor="red"}
 

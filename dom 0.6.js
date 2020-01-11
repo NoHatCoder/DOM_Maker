@@ -1,6 +1,6 @@
 /**
-Copyright (c) 2014-2020, Specialisterne, Jacob Christian Munch-Andersen.
-http://dk.specialisterne.com/
+Copyright (c) 2014, Specialisterne.
+http://specialisterne.com/dk/
 All rights reserved.
 Authors:
 Jacob Christian Munch-Andersen
@@ -25,9 +25,9 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-// For information and latest version see: https://github.com/NoHatCoder/DOM_Maker
+// For information and latest version see: https://github.com/Jacob-Christian-Munch-Andersen/DOM_Maker
 
-//DOM Maker version 0.8.
+//DOM Maker alpha version 0.6.
 var dom=(function(){
 	//Build a translation object for fixing property casing, the content has been determined experimentally, I can't find a reference for this.
 	var upperProperties=["acceptCharset","accessKey","bgColor","cellPadding","cellSpacing","codeBase","colSpan","contentEditable","contextMenu","dateTime","dirName","formAction","formEnctype","formMethod","formNoValidate","formTarget","frameBorder","httpEquiv","isMap","itemId","itemProp","itemRef","itemScope","itemType","itemValue","maxLength","noValidate","readOnly","rowSpan","tabIndex","useMap"]
@@ -36,6 +36,8 @@ var dom=(function(){
 	for(a=0;a<upperProperties.length;a++){
 		translateProperties[upperProperties[a].toLowerCase()]=upperProperties[a]
 	}
+	//Determine if the browser is a version of Internet Explorer earlier than 9, feature detection is unfortunately not practical in this case.
+	var ltie9=(navigator.userAgent.match(/MSIE (\d)\./)||[])[1]<9
 	function dom(tagName,properties){
 		var innerProperties={}
 		var firstChild=1
@@ -45,10 +47,10 @@ var dom=(function(){
 		var styleKey
 		var attributeKey
 		if(typeof tagName!="string"){
-			return err("TagName must be a string.")
+			throw new Error("TagName must be a string.")
 		}
 		//Detect if a properties object has been passed.
-		if(properties && typeof properties=="object" && !properties.nodeType && !isFinite(properties.length)){
+		if(typeof properties=="object" && !properties.nodeType && !isFinite(properties.length)){
 			innerProperties=properties
 			firstChild=2
 		}
@@ -62,25 +64,36 @@ var dom=(function(){
 			if(key=="style"){
 				if(typeof innerProperties.style=="object"){
 					for(styleKey in innerProperties.style){
-						element.style[styleKey]=innerProperties.style[styleKey]+""
+						try{
+							element.style[styleKey]=innerProperties.style[styleKey]
+						}catch(e){} //Internet Explorer 8 and earlier will throw if a style is set to an unsupported value.
 					}
 				}
 				else{
-					return err("Style attribute must be an object.")
+					throw new Error("Style attribute must be an object.")
 				}
 			}
 			else if(key=="class" || key=="className"){
-				if(typeof innerProperties[key]=="object" && innerProperties[key].length>=0){
-					element.className=Array.prototype.join.call(innerProperties[key]," ")
+				if(typeof innerProperties[key]=="object"){
+					element.className=innerProperties[key].join(" ")
 				}
 				else{
-					element.className=innerProperties[key]+""
+					element.className=innerProperties[key]
 				}
 			}
 			else if(key=="attributes"){
 				for(attributeKey in innerProperties[key]){
 					element.setAttribute(attributeKey,innerProperties[key][attributeKey])
 				}
+			}
+			//IE8 and earlier requires "encoding" to be set rather than "enctype", setting both for all browsers works.
+			else if(key=="enctype" || key=="encoding"){
+				element.encoding=innerProperties[key]
+				element.enctype=innerProperties[key]
+			}
+			//IE8 and earlier does not pass event objects to event handlers, given event handlers will therefore be wrapped in IE8 and earlier.
+			else if(ltie9 && /^on/.test(key) && typeof innerProperties[key]=="function"){
+				element[key]=wrapHandlerIE(innerProperties[key])
 			}
 			else if(translateProperties.hasOwnProperty(key)){
 				element[translateProperties[key]]=innerProperties[key]
@@ -96,10 +109,9 @@ var dom=(function(){
 			var childType=typeof subElement
 			var stringArray
 			var b
-			if(subElement===null){
-			}
-			else if(childType=="string"){
-				stringArray=subElement.split(/\r\n?|\n\r?/g)
+			if(childType=="string"){
+				//Splitting by a regex unfortunately doesn't work correctly in IE8 and earlier, therefore this slight detour.
+				stringArray=subElement.replace(/\r\n?|\n\r?/g,"\n").split("\n")
 				for(b=0;b<stringArray.length;b++){
 					if(b){
 						element.appendChild(document.createElement("br"))
@@ -108,9 +120,6 @@ var dom=(function(){
 						element.appendChild(document.createTextNode(stringArray[b]))
 					}
 				}
-			}
-			else if(childType=="number"){
-				element.appendChild(document.createTextNode(""+subElement))
 			}
 			else if(childType=="object" && subElement.nodeType){
 				element.appendChild(subElement)
@@ -122,19 +131,7 @@ var dom=(function(){
 				}
 			}
 			else{
-				element.appendChild(err("Child element must be a DOM element, string, number, array or null."))
-			}
-		}
-		function err(message){
-			if(dom.errorClass===undefined){
-				throw new Error(message)
-			}
-			else{
-				try{
-					console.log(new Error(message))
-				}
-				catch(e){}
-				return dom.SPAN({className:""+dom.errorClass},message)
+				throw new Error("Child element must be a DOM element or a string.")
 			}
 		}
 		return element
@@ -159,11 +156,27 @@ var dom=(function(){
 		}
 		return curryWrap
 	}
+	function wrapHandlerIE(fn){
+		function wrap(){
+			return fn.call(this,window.event)
+		}
+		return wrap
+	}
+	function wrapHandler(fn){
+		return fn
+	}
+	function globalScope(){
+		var a
+		for(a=0;a<elems.length;a++){
+			window[elems[a]]=dom[elems[a]]
+		}
+	}
+	dom.wrapHandler=(ltie9?wrapHandlerIE:wrapHandler)
+	dom.globalScope=globalScope
 	dom.curry=curry
-	dom.errorClass=undefined
 	var elems=["A","ABBR","ACRONYM","ADDRESS","APPLET","AREA","ARTICLE","ASIDE","AUDIO","B","BASE","BASEFONT","BDI","BDO","BGSOUND","BIG","BLINK","BLOCKQUOTE","BODY","BR","BUTTON","CANVAS","CAPTION","CENTER","CITE","CODE","COL","COLGROUP","CONTENT","DATA","DATALIST","DD","DECORATOR","DEL","DETAILS","DFN","DIALOG","DIR","DIV","DL","DT","ELEMENT","EM","EMBED","FIELDSET","FIGCAPTION","FIGURE","FONT","FOOTER","FORM","FRAME","FRAMESET","H1","H2","H3","H4","H5","H6","HEAD","HEADER","HGROUP","HR","HTML","I","IFRAME","IMG","INPUT","INS","ISINDEX","KBD","KEYGEN","LABEL","LEGEND","LI","LINK","LISTING","MAIN","MAP","MARK","MARQUEE","MENU","MENUITEM","META","METER","NAV","NOBR","NOFRAMES","NOSCRIPT","OBJECT","OL","OPTGROUP","OPTION","OUTPUT","P","PARAM","PLAINTEXT","PRE","PROGRESS","Q","RP","RT","RUBY","S","SAMP","SCRIPT","SECTION","SELECT","SHADOW","SMALL","SOURCE","SPACER","SPAN","STRIKE","STRONG","STYLE","SUB","SUMMARY","SUP","TABLE","TBODY","TD","TEMPLATE","TEXTAREA","TFOOT","TH","THEAD","TIME","TITLE","TR","TRACK","TT","U","UL","VAR","VIDEO","WBR","XMP","FRAGMENT"]
 	for(a=0;a<elems.length;a++){
-		window[elems[a]]=dom[elems[a]]=curry(dom,elems[a].toLowerCase())
+		dom[elems[a]]=curry(dom,elems[a].toLowerCase())
 	}
 	return dom
 }());
