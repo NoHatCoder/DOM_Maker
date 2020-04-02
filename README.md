@@ -10,7 +10,7 @@ The library should itself be short and easily readable. Rather than the library 
 
     document.body.appendChild(
         FRAGMENT(
-		      P("A simple HTML structure with ",SPAN("nested")," elements.")
+            P("A simple HTML structure with ",SPAN("nested")," elements.")
             ,P({className:"information"},"It is appended to the end of the body.")
             ,P({style:{backgroundColor:"yellow"}},"It contains inline styling.")
             ,BUTTON({onclick:function(){alert("Button clicked.")}},"Click me.")
@@ -29,4 +29,4 @@ Version 0.6 contain a number of fixes for oddities of IE 8. It has been used in 
 Version 0.8 removes IE 8 support. The `globalScope` function is removed, and the library now defaults to populate the global scope with upper case dom creation functions. The library may now be configured to generate error message DOM elements instead of throwing upon invalid input.
 
 #### License
-The library and the guide have a 2-clause BSD license. The JavaScript frameworks included in this package are not covered by this license. They have their own respective licenses provided by the respective rights holders.
+The library and the guide have a 2-clause BSD license.
